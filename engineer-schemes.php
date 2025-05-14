@@ -33,12 +33,7 @@ if (empty($_SESSION['user_id'])) {
     </div>
     <nav>
       <ul>
-        <li>
-          <a href="engineer-dashboard.php">
-            <i class="fas fa-chart-bar"></i>
-            <span class="nav-item">Dashboard</span>
-          </a>
-        </li>
+        
         <li>
           <a href="engineer-profile.php">
             <i class="fas fa-user-circle"></i>
@@ -66,10 +61,7 @@ if (empty($_SESSION['user_id'])) {
       </div>
       <div class="user-wrapper">
         <!-- Changed notification element to a Bootstrap trigger button -->
-        <button type="button" class="btn notification-btn" data-bs-toggle="modal" data-bs-target="#notificationModal">
-          <i class="fas fa-bell"></i>
-          <span class="notification-badge">3</span>
-        </button>
+        
         <div class="dropdown">
           <button class="btn btn-secondary dropdown-toggle rounded-circle" type="button" id="userDropdown"
             data-bs-toggle="dropdown" aria-expanded="false">
@@ -87,6 +79,7 @@ if (empty($_SESSION['user_id'])) {
       <div class="schemes-tabs">
         <button class="tab-btn active" data-tab="ongoing">Ongoing</button>
         <button class="tab-btn" data-tab="completed">Completed</button>
+        <button class="tab-btn" data-tab="collaborated">Collaborated</button>
       </div>
 
       <div class="tab-content active" id="ongoing">
@@ -192,6 +185,95 @@ if (empty($_SESSION['user_id'])) {
           </tbody>
         </table>
       </div>
+
+      <div class="tab-content" id="collaborated">
+        <table id="collaboratedSchemesTable" class="table table-striped">
+          <thead>
+            <tr>
+              <th>Scheme ID</th>
+              <th>Title</th>
+              <th>Description</th>
+              <th>Deadline</th>
+              <th>Collaboration With</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php
+            $collaboratedSchemes = [];
+            $engineerId = $_SESSION['user_id'];
+            $collabQuery = "SELECT 
+                c.id AS collaboration_id, 
+                c.status, 
+                s1.id AS id_1, s1.title AS title_1, s1.description AS description_1, s1.deadline AS deadline_1, s1.department AS department_1, s1.region AS region_1, s1.budget AS budget_1, s1.assigned_engineer_id AS assigned_engineer_id_1,
+                s2.id AS id_2, s2.title AS title_2, s2.description AS description_2, s2.deadline AS deadline_2, s2.department AS department_2, s2.region AS region_2, s2.budget AS budget_2, s2.assigned_engineer_id AS assigned_engineer_id_2
+                FROM collaborations c
+                JOIN schemes s1 ON c.scheme1_id = s1.id
+                JOIN schemes s2 ON c.scheme2_id = s2.id
+                WHERE c.status = 'approved' AND (s1.assigned_engineer_id = ? OR s2.assigned_engineer_id = ?)";
+            $collabStmt = $conn->prepare($collabQuery);
+            $collabStmt->bind_param('ii', $engineerId, $engineerId);
+            $collabStmt->execute();
+            $collabResult = $collabStmt->get_result();
+            while ($row = $collabResult->fetch_assoc()) {
+                // Show the scheme that the engineer is collaborating WITH, not their own
+                if ($row['assigned_engineer_id_1'] == $engineerId) {
+                    // Engineer owns s1, show s2 as the collaborated scheme
+                    $collaboratedSchemes[] = [
+                        'collaboration_id' => $row['collaboration_id'],
+                        'id' => $row['id_2'],
+                        'title' => $row['title_2'],
+                        'description' => $row['description_2'],
+                        'deadline' => $row['deadline_2'],
+                        'department' => $row['department_2'],
+                        'collab_with' => $row['region_1'],
+                        'budget' => $row['budget_2'],
+                    ];
+                } else {
+                    // Engineer owns s2, show s1 as the collaborated scheme
+                    $collaboratedSchemes[] = [
+                        'collaboration_id' => $row['collaboration_id'],
+                        'id' => $row['id_1'],
+                        'title' => $row['title_1'],
+                        'description' => $row['description_1'],
+                        'deadline' => $row['deadline_1'],
+                        'department' => $row['department_1'],
+                        'collab_with' => $row['region_2'],
+                        'budget' => $row['budget_1'],
+                    ];
+                }
+            }
+            $collabStmt->close();
+
+            foreach ($collaboratedSchemes as $row) {
+              ?>
+              <tr>
+                <td>
+                  <a href="scheme-details.php?id=<?php echo htmlspecialchars($row['id']); ?>&collaboration_id=<?php echo htmlspecialchars($row['collaboration_id']); ?>" class="text-decoration-none">
+                    <?php echo htmlspecialchars($row['id']); ?>
+                  </a>
+                </td>
+                <td><?php echo htmlspecialchars($row['title']); ?></td>
+                <td>
+                  <button class="btn btn-primary btn-sm view-description-btn" data-bs-toggle="modal" data-bs-target="#descriptionModal"
+                    data-description="<?php echo htmlspecialchars($row['description']); ?>"
+                    data-region="<?php echo htmlspecialchars($row['collab_with']); ?>"
+                    data-budget="<?php echo htmlspecialchars($row['budget']); ?>">
+                    View
+                  </button>
+                </td>
+                <td><?php echo htmlspecialchars($row['deadline']); ?></td>
+                <td><?php echo htmlspecialchars($row['collab_with']); ?></td>
+              </tr>
+              <?php
+            }
+
+            if (empty($collaboratedSchemes)) {
+              echo '<tr><td colspan="5">No collaborated schemes found.</td></tr>';
+            }
+            ?>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
@@ -243,9 +325,9 @@ if (empty($_SESSION['user_id'])) {
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <p><strong>Description:</strong> <span id="modalDescription"></span></p>
-          <p><strong>Region:</strong> <span id="modalRegion"></span></p>
-          <p><strong>Budget:</strong> <span id="modalBudget"></span></p>
+          <p><strong>Description:</strong> <span id="descModalDescription"></span></p>
+          <p><strong>Region:</strong> <span id="descModalRegion"></span></p>
+          <p><strong>Budget:</strong> <span id="descModalBudget"></span></p>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -315,6 +397,7 @@ if (empty($_SESSION['user_id'])) {
       // Initialize DataTable
       $('#ongoingSchemesTable').DataTable();
       $('#completedSchemesTable').DataTable();
+      $('#collaboratedSchemesTable').DataTable();
     });
 
     // Populate modal with scheme details
@@ -324,9 +407,9 @@ if (empty($_SESSION['user_id'])) {
         const region = this.getAttribute('data-region');
         const budget = this.getAttribute('data-budget');
 
-        document.getElementById('modalDescription').textContent = description;
-        document.getElementById('modalRegion').textContent = region;
-        document.getElementById('modalBudget').textContent = budget;
+        document.getElementById('descModalDescription').textContent = description || '';
+        document.getElementById('descModalRegion').textContent = region || '';
+        document.getElementById('descModalBudget').textContent = budget || '';
       });
     });
   </script>

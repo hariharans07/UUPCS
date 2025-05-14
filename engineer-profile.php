@@ -45,12 +45,7 @@ $user['created_at'] = date('Y-m-d', strtotime($user['created_at']));
     </div>
     <nav>
       <ul>
-        <li>
-          <a href="engineer-dashboard.php">
-            <i class="fas fa-chart-bar"></i>
-            <span class="nav-item">Dashboard</span>
-          </a>
-        </li>
+        
         <li>
           <a href="engineer-profile.php" class="active">
             <i class="fas fa-user-circle"></i>
@@ -78,10 +73,7 @@ $user['created_at'] = date('Y-m-d', strtotime($user['created_at']));
       </div>
       <div class="user-wrapper">
         <!-- Changed notification element to a Bootstrap trigger button -->
-        <button type="button" class="btn notification-btn" data-bs-toggle="modal" data-bs-target="#notificationModal">
-          <i class="fas fa-bell"></i>
-          <span class="notification-badge">3</span>
-        </button>
+        
         <div class="dropdown">
           <button class="btn btn-secondary dropdown-toggle rounded-circle" type="button" id="userDropdown"
             data-bs-toggle="dropdown" aria-expanded="false">
@@ -97,9 +89,7 @@ $user['created_at'] = date('Y-m-d', strtotime($user['created_at']));
 
     <div class="scheme-form-container">
       <div class="profile-header">
-        <div class="profile-image">
-          <img src="assets/profile-logo.png" alt="Profile Picture" />
-        </div>
+        
         <div class="profile-info">
           <h2><?php echo htmlspecialchars($user['name']); ?></h2>
           <p>EID: <?php echo htmlspecialchars($user_id); ?></p>

@@ -33,6 +33,45 @@ while ($row = $result->fetch_assoc()) {
   $completedSchemes[] = $row;
 }
 $stmt->close();
+
+// Fetch collaborated schemes for the session department
+$collaboratedSchemes = [];
+$collabQuery = "SELECT c.id AS collaboration_id, c.status, 
+    s1.id AS id_1, s1.title AS title_1, s1.budget AS budget_1, s1.deadline AS deadline_1, s1.department AS department_1, s1.region AS region_1,
+    s2.id AS id_2, s2.title AS title_2, s2.budget AS budget_2, s2.deadline AS deadline_2, s2.department AS department_2, s2.region AS region_2
+    FROM collaborations c
+    JOIN schemes s1 ON c.scheme1_id = s1.id
+    JOIN schemes s2 ON c.scheme2_id = s2.id
+    WHERE c.status = 'approved' AND (s1.department = ? OR s2.department = ?)
+";
+$collabStmt = $conn->prepare($collabQuery);
+$collabStmt->bind_param('ss', $department, $department);
+$collabStmt->execute();
+$collabResult = $collabStmt->get_result();
+while ($row = $collabResult->fetch_assoc()) {
+    if ($row['department_1'] === $department) {
+        $collaboratedSchemes[] = [
+            'collaboration_id' => $row['collaboration_id'],
+            'id' => $row['id_1'],
+            'title' => $row['title_1'],
+            'budget' => $row['budget_1'],
+            'deadline' => $row['deadline_1'],
+            'department' => $row['department_1'],
+            'collab_with' => $row['region_2'],
+        ];
+    } else {
+        $collaboratedSchemes[] = [
+            'collaboration_id' => $row['collaboration_id'],
+            'id' => $row['id_2'],
+            'title' => $row['title_2'],
+            'budget' => $row['budget_2'],
+            'deadline' => $row['deadline_2'],
+            'department' => $row['department_2'],
+            'collab_with' => $row['region_1'],
+        ];
+    }
+}
+$collabStmt->close();
 ?>
 
 <!DOCTYPE html>
@@ -198,44 +237,38 @@ $stmt->close();
 
       <div class="tab-content" id="collaborated">
         <div class="schemes-table">
-          <table>
+          <table id="collaboratedTable" class="table table-striped">
             <thead>
               <tr>
                 <th>SID</th>
                 <th>Scheme Title</th>
                 <th>Budget</th>
                 <th>Deadline</th>
+                <th>Collaboration With</th>
                 <th>Action</th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td onclick="window.location.href='tasks.php'">006</td>
-                <td>Smart Traffic System</td>
-                <td>₹75,00,000</td>
-                <td>2024-09-01</td>
-                <td>
-                  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#schemeModal">
-                    <i class="fas fa-eye"></i> View
-                  </button>
-                </td>
-              </tr>
-              <tr>
-                <td onclick="window.location.href='tasks.php'">007</td>
-                <td>Waste Management</td>
-                <td>₹60,00,000</td>
-                <td>2024-07-30</td>
-                <td>
-                  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#schemeModal">
-                    <i class="fas fa-eye"></i> View
-                  </button>
-                </td>
-              </tr>
+              <?php foreach ($collaboratedSchemes as $index => $scheme): ?>
+                <tr>
+                  <td><?php echo $index + 1; ?></td>
+                  <td><?php echo htmlspecialchars($scheme['title']); ?></td>
+                  <td>₹<?php echo htmlspecialchars(number_format($scheme['budget'])); ?></td>
+                  <td><?php echo htmlspecialchars($scheme['deadline']); ?></td>
+                  <td><?php echo htmlspecialchars($scheme['collab_with']); ?></td>
+                  <td>
+                    <button class="btn btn-primary" data-scheme-id="<?php echo $scheme['id']; ?>" data-collaboration-id="<?php echo $scheme['collaboration_id']; ?>" data-bs-toggle="modal" data-bs-target="#schemeModal">
+                      <i class="fas fa-eye"></i> View
+                    </button>
+                  </td>
+                </tr>
+              <?php endforeach; ?>
             </tbody>
           </table>
         </div>
       </div>
     </div>
+  </div>
 
     <!-- Updated Modal Structure to Include Description, Start Date, and Region -->
     <div class="modal fade" id="schemeModal" tabindex="-1" aria-labelledby="schemeModalLabel" aria-hidden="true">
@@ -315,10 +348,11 @@ $stmt->close();
       $(document).ready(function () {
         $('#ongoingTable').DataTable();
         $('#completedTable').DataTable();
+        $('#collaboratedTable').DataTable();
       });
 
       $(document).ready(function () {
-        $('#ongoingTable, #completedTable').on('click', '.btn-primary', function () {
+        $('#ongoingTable, #completedTable, #collaboratedTable').on('click', '.btn-primary', function () {
           const schemeId = $(this).data('scheme-id');
 
           $.ajax({

@@ -6,21 +6,27 @@ if (empty($_SESSION['user_id'])||$_SESSION['role'] != 'ceo') {
     exit;
 }
 
-// Fetch pending resource requests with engineer and scheme info
+// Fetch pending resource requests for collaborated schemes
 $department = $_SESSION['department'];
-$query = "
+$collabRequestsQuery = "
     SELECT rr.id, rr.type, rr.requested_quantity, rr.status, u.name AS engineer_name, s.title AS scheme_title
     FROM resource_requests rr
     LEFT JOIN users u ON rr.engineer_id = u.id
     LEFT JOIN schemes s ON rr.scheme_id = s.id
+    LEFT JOIN collaborations c ON rr.collaboration_id = c.id
     WHERE rr.status = 'pending'
-      AND (s.department = ? OR s.department = 'common')
+      AND (
+        (s.department = ? OR s.department = 'common')
+        OR (c.status = 'approved' AND (s.id = c.scheme1_id OR s.id = c.scheme2_id)
+            AND (SELECT department FROM schemes WHERE id = c.scheme1_id) = ?
+            OR (SELECT department FROM schemes WHERE id = c.scheme2_id) = ?)
+      )
     ORDER BY rr.id DESC
 ";
-$stmt = $conn->prepare($query);
-$stmt->bind_param('s', $department);
-$stmt->execute();
-$result = $stmt->get_result();
+$collabRequestsStmt = $conn->prepare($collabRequestsQuery);
+$collabRequestsStmt->bind_param('sss', $department, $department, $department);
+$collabRequestsStmt->execute();
+$collabRequestsResult = $collabRequestsStmt->get_result();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -115,7 +121,7 @@ $result = $stmt->get_result();
                         </tr>
                     </thead>
                     <tbody>
-                        <?php while ($row = $result->fetch_assoc()): ?>
+                        <?php while ($row = $collabRequestsResult->fetch_assoc()): ?>
                         <tr>
                             <td><?php echo htmlspecialchars($row['id']); ?></td>
                             <td><?php echo htmlspecialchars($row['type']); ?></td>

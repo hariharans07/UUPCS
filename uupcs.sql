@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 09, 2025 at 12:03 PM
+-- Generation Time: May 14, 2025 at 08:08 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -33,7 +33,7 @@ CREATE TABLE `collaborations` (
   `scheme2_id` int(11) DEFAULT NULL,
   `initiator_ceo_id` int(11) DEFAULT NULL,
   `receiver_ceo_id` int(11) DEFAULT NULL,
-  `status` enum('requested','accepted','rejected') DEFAULT NULL,
+  `status` varchar(50) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -80,20 +80,14 @@ CREATE TABLE `resource_requests` (
   `id` int(11) NOT NULL,
   `engineer_id` int(11) DEFAULT NULL,
   `scheme_id` int(11) DEFAULT NULL,
+  `collaboration_id` int(11) DEFAULT NULL,
+  `taskid` int(11) DEFAULT NULL,
   `type` varchar(100) DEFAULT NULL,
   `requested_quantity` int(11) DEFAULT NULL,
   `status` enum('pending','approved','rejected') DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `resource_requests`
---
-
-INSERT INTO `resource_requests` (`id`, `engineer_id`, `scheme_id`, `type`, `requested_quantity`, `status`, `created_at`, `updated_at`) VALUES
-(1, 5, 2, 'Cement Bags', 50, 'approved', '2025-05-08 04:23:17', '2025-05-08 04:58:30'),
-(3, 5, 2, 'Sand', 30, 'pending', '2025-05-08 05:04:31', '2025-05-08 05:04:31');
 
 -- --------------------------------------------------------
 
@@ -117,13 +111,6 @@ CREATE TABLE `schemes` (
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `schemes`
---
-
-INSERT INTO `schemes` (`id`, `title`, `department`, `description`, `region`, `assigned_engineer_id`, `startdate`, `deadline`, `budget`, `status`, `created_by_ceo_id`, `created_at`, `updated_at`) VALUES
-(2, 'hariharan', 'water', 'first scheme', 'karur', 5, '2025-04-29', '2025-09-15', 500000.00, 'ongoing', 1, '2025-04-07 06:23:17', '2025-04-07 06:23:17');
-
 -- --------------------------------------------------------
 
 --
@@ -133,19 +120,13 @@ INSERT INTO `schemes` (`id`, `title`, `department`, `description`, `region`, `as
 CREATE TABLE `tasks` (
   `id` int(11) NOT NULL,
   `scheme_id` int(11) DEFAULT NULL,
+  `collaboration_id` int(11) DEFAULT NULL,
   `engineer_id` int(11) DEFAULT NULL,
   `description` text DEFAULT NULL,
   `status` varchar(50) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `tasks`
---
-
-INSERT INTO `tasks` (`id`, `scheme_id`, `engineer_id`, `description`, `status`, `created_at`, `updated_at`) VALUES
-(2, 2, 5, 'wwe ', 'ongoing', '2025-05-06 09:42:27', '2025-05-08 04:39:18');
 
 -- --------------------------------------------------------
 
@@ -205,7 +186,8 @@ ALTER TABLE `resources`
 ALTER TABLE `resource_requests`
   ADD PRIMARY KEY (`id`),
   ADD KEY `engineer_id` (`engineer_id`),
-  ADD KEY `scheme_id` (`scheme_id`);
+  ADD KEY `scheme_id` (`scheme_id`),
+  ADD KEY `resource_requests_ibfk_3` (`collaboration_id`);
 
 --
 -- Indexes for table `schemes`
@@ -221,7 +203,8 @@ ALTER TABLE `schemes`
 ALTER TABLE `tasks`
   ADD PRIMARY KEY (`id`),
   ADD KEY `scheme_id` (`scheme_id`),
-  ADD KEY `engineer_id` (`engineer_id`);
+  ADD KEY `engineer_id` (`engineer_id`),
+  ADD KEY `tasks_ibfk_3` (`collaboration_id`);
 
 --
 -- Indexes for table `users`
@@ -238,7 +221,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `collaborations`
 --
 ALTER TABLE `collaborations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `resources`
@@ -250,19 +233,19 @@ ALTER TABLE `resources`
 -- AUTO_INCREMENT for table `resource_requests`
 --
 ALTER TABLE `resource_requests`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `schemes`
 --
 ALTER TABLE `schemes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `tasks`
 --
 ALTER TABLE `tasks`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -288,7 +271,8 @@ ALTER TABLE `collaborations`
 --
 ALTER TABLE `resource_requests`
   ADD CONSTRAINT `resource_requests_ibfk_1` FOREIGN KEY (`engineer_id`) REFERENCES `users` (`id`),
-  ADD CONSTRAINT `resource_requests_ibfk_2` FOREIGN KEY (`scheme_id`) REFERENCES `schemes` (`id`);
+  ADD CONSTRAINT `resource_requests_ibfk_2` FOREIGN KEY (`scheme_id`) REFERENCES `schemes` (`id`),
+  ADD CONSTRAINT `resource_requests_ibfk_3` FOREIGN KEY (`collaboration_id`) REFERENCES `collaborations` (`id`);
 
 --
 -- Constraints for table `schemes`
@@ -302,7 +286,8 @@ ALTER TABLE `schemes`
 --
 ALTER TABLE `tasks`
   ADD CONSTRAINT `tasks_ibfk_1` FOREIGN KEY (`scheme_id`) REFERENCES `schemes` (`id`),
-  ADD CONSTRAINT `tasks_ibfk_2` FOREIGN KEY (`engineer_id`) REFERENCES `users` (`id`);
+  ADD CONSTRAINT `tasks_ibfk_2` FOREIGN KEY (`engineer_id`) REFERENCES `users` (`id`),
+  ADD CONSTRAINT `tasks_ibfk_3` FOREIGN KEY (`collaboration_id`) REFERENCES `collaborations` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
