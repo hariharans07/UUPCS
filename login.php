@@ -28,7 +28,7 @@
             <form id="loginForm" class="login-form" onsubmit="handleCEOLogin(event)">
               <div class="form-group">
                 <label for="ceo-username">Username/Email:</label>
-                <input type="text" id="ceo-username" name="ceo-username" required placeholder="Enter CEO username" />
+                <input type="text" id="ceo-username" name="ceo-username" required placeholder="Enter username" />
               </div>
               <div class="form-group">
                 <label for="ceo-password">Password</label>

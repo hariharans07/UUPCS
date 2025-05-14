@@ -132,8 +132,8 @@ if (empty($_SESSION['user_id'])||$_SESSION['role'] != 'ceo') {
                       <td>{$row['name']}</td>
                       <td>{$row['total_quantity']}</td>
                       <td><span class='status-badge {$statusClass}'>{$status}</span></td>
-                      <td class='action-buttons'>
-                        <button class='edit-btn' data-id='{$row['id']}' title='Increase Quantity'>
+                      <td class='text-center'>
+                        <button class='btn btn-primary btn-sm edit-btn' data-id='{$row['id']}' title='Increase Quantity'>
                           <i class='fas fa-plus-circle'></i>
                         </button>
                       </td>
