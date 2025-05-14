@@ -171,15 +171,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_engineer'])) {
                     <?php echo htmlspecialchars($row['status']); ?>
                   </span>
                 </td>
-                <td class="text-center action-buttons">
-                  <button class="edit-btn" data-id="<?php echo htmlspecialchars($row['id']); ?>">
-                    <i class="fas fa-edit"></i>
-                  </button>
-                  <?php if ($row['status'] === 'Inactive'): ?>
-                    <button class="delete-btn" data-id="<?php echo htmlspecialchars($row['id']); ?>">
-                      <i class="fas fa-trash"></i>
+                <td class="text-center">
+                  <div class="btn-group" role="group">
+                    <button class="btn btn-sm btn-primary edit-btn me-2" data-id="<?php echo htmlspecialchars($row['id']); ?>">
+                      <i class="fas fa-edit"></i>
                     </button>
-                  <?php endif; ?>
+                    <?php if ($row['status'] === 'Inactive'): ?>
+                      <button class="btn btn-sm btn-danger delete-btn" data-id="<?php echo htmlspecialchars($row['id']); ?>">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    <?php endif; ?>
+                  </div>
                 </td>
               </tr>
             <?php endwhile; ?>
