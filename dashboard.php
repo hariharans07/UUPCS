@@ -270,34 +270,40 @@ error_log("Collab requests count: " . count($collab_requests)); // Debug line
                     <?php if (!empty($overlap_alerts)): ?>
                         <?php foreach ($overlap_alerts as $alert): ?>
                             <div class="mb-4 border-bottom pb-3">
-                                <h6>Your Department's Scheme:</h6>
-                                <ul>
-                                    <li><strong>ID:</strong> <?php echo htmlspecialchars($alert['current']['id']); ?></li>
-                                    <li><strong>Title:</strong> <?php echo htmlspecialchars($alert['current']['title']); ?></li>
-                                    <li><strong>Department:</strong> <?php echo htmlspecialchars($alert['current']['department']); ?></li>
-                                    <li><strong>Description:</strong> <?php echo htmlspecialchars($alert['current']['description']); ?></li>
-                                    <li><strong>Region:</strong> <?php echo htmlspecialchars($alert['current']['region']); ?></li>
-                                    <li><strong>Assigned Engineer ID:</strong> <?php echo htmlspecialchars($alert['current']['assigned_engineer_id']); ?></li>
-                                    <li><strong>Start Date:</strong> <?php echo htmlspecialchars($alert['current']['startdate']); ?></li>
-                                    <li><strong>Deadline:</strong> <?php echo htmlspecialchars($alert['current']['deadline']); ?></li>
-                                    <li><strong>Budget:</strong> <?php echo htmlspecialchars($alert['current']['budget']); ?></li>
-                                    <li><strong>Status:</strong> <?php echo htmlspecialchars($alert['current']['status']); ?></li>
-                                    <li><strong>Created By CEO ID:</strong> <?php echo htmlspecialchars($alert['current']['created_by_ceo_id']); ?></li>
-                                </ul>
-                                <h6>Overlapping Scheme from Another Department:</h6>
-                                <ul>
-                                    <li><strong>ID:</strong> <?php echo htmlspecialchars($alert['other']['id']); ?></li>
-                                    <li><strong>Title:</strong> <?php echo htmlspecialchars($alert['other']['title']); ?></li>
-                                    <li><strong>Department:</strong> <?php echo htmlspecialchars($alert['other']['department']); ?></li>
-                                    <li><strong>Description:</strong> <?php echo htmlspecialchars($alert['other']['description']); ?></li>
-                                    <li><strong>Region:</strong> <?php echo htmlspecialchars($alert['other']['region']); ?></li>
-                                    <li><strong>Assigned Engineer ID:</strong> <?php echo htmlspecialchars($alert['other']['assigned_engineer_id']); ?></li>
-                                    <li><strong>Start Date:</strong> <?php echo htmlspecialchars($alert['other']['startdate']); ?></li>
-                                    <li><strong>Deadline:</strong> <?php echo htmlspecialchars($alert['other']['deadline']); ?></li>
-                                    <li><strong>Budget:</strong> <?php echo htmlspecialchars($alert['other']['budget']); ?></li>
-                                    <li><strong>Status:</strong> <?php echo htmlspecialchars($alert['other']['status']); ?></li>
-                                    <li><strong>Created By CEO ID:</strong> <?php echo htmlspecialchars($alert['other']['created_by_ceo_id']); ?></li>
-                                </ul>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6>Your Department's Scheme:</h6>
+                                        <ul>
+                                            <li><strong>ID:</strong> <?php echo htmlspecialchars($alert['current']['id']); ?></li>
+                                            <li><strong>Title:</strong> <?php echo htmlspecialchars($alert['current']['title']); ?></li>
+                                            <li><strong>Department:</strong> <?php echo htmlspecialchars($alert['current']['department']); ?></li>
+                                            <li><strong>Description:</strong> <?php echo htmlspecialchars($alert['current']['description']); ?></li>
+                                            <li><strong>Region:</strong> <?php echo htmlspecialchars($alert['current']['region']); ?></li>
+                                            <li><strong>Assigned Engineer ID:</strong> <?php echo htmlspecialchars($alert['current']['assigned_engineer_id']); ?></li>
+                                            <li><strong>Start Date:</strong> <?php echo htmlspecialchars($alert['current']['startdate']); ?></li>
+                                            <li><strong>Deadline:</strong> <?php echo htmlspecialchars($alert['current']['deadline']); ?></li>
+                                            <li><strong>Budget:</strong> <?php echo htmlspecialchars($alert['current']['budget']); ?></li>
+                                            <li><strong>Status:</strong> <?php echo htmlspecialchars($alert['current']['status']); ?></li>
+                                            <li><strong>Created By CEO ID:</strong> <?php echo htmlspecialchars($alert['current']['created_by_ceo_id']); ?></li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6>Overlapping Scheme from Another Department:</h6>
+                                        <ul>
+                                            <li><strong>ID:</strong> <?php echo htmlspecialchars($alert['other']['id']); ?></li>
+                                            <li><strong>Title:</strong> <?php echo htmlspecialchars($alert['other']['title']); ?></li>
+                                            <li><strong>Department:</strong> <?php echo htmlspecialchars($alert['other']['department']); ?></li>
+                                            <li><strong>Description:</strong> <?php echo htmlspecialchars($alert['other']['description']); ?></li>
+                                            <li><strong>Region:</strong> <?php echo htmlspecialchars($alert['other']['region']); ?></li>
+                                            <li><strong>Assigned Engineer ID:</strong> <?php echo htmlspecialchars($alert['other']['assigned_engineer_id']); ?></li>
+                                            <li><strong>Start Date:</strong> <?php echo htmlspecialchars($alert['other']['startdate']); ?></li>
+                                            <li><strong>Deadline:</strong> <?php echo htmlspecialchars($alert['other']['deadline']); ?></li>
+                                            <li><strong>Budget:</strong> <?php echo htmlspecialchars($alert['other']['budget']); ?></li>
+                                            <li><strong>Status:</strong> <?php echo htmlspecialchars($alert['other']['status']); ?></li>
+                                            <li><strong>Created By CEO ID:</strong> <?php echo htmlspecialchars($alert['other']['created_by_ceo_id']); ?></li>
+                                        </ul>
+                                    </div>
+                                </div>
                                 <button class="btn btn-primary collaborate-btn mt-2"
                                     data-scheme1="<?php echo htmlspecialchars($alert['current']['id']); ?>"
                                     data-scheme2="<?php echo htmlspecialchars($alert['other']['id']); ?>"
