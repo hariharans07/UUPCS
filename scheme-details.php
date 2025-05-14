@@ -369,11 +369,9 @@ if ($collaborationId) {
                 success: function (response) {
                     const result = JSON.parse(response);
                     if (result.success) {
-                        Swal.fire('Success', 'Task added successfully', 'success');
-                        document.getElementById("addTaskForm").reset();
-                        const addTaskModal = bootstrap.Modal.getInstance(document.getElementById("addTaskModal"));
-                        addTaskModal.hide();
-                        // Optionally reload the tasks list here
+                        Swal.fire('Success', 'Task added successfully', 'success').then(() => {
+                            location.reload();
+                        });
                     } else {
                         Swal.fire('Error', result.message || 'Error occurred', 'error');
                     }
@@ -427,9 +425,9 @@ if ($collaborationId) {
                 success: function (response) {
                     const result = JSON.parse(response);
                     if (result.success) {
-                        Swal.fire('Success', 'Resource request submitted successfully', 'success');
-                        $('#requestResourcesModal').modal('hide');
-                        $('#requestResourcesForm')[0].reset();
+                        Swal.fire('Success', 'Resource request submitted successfully', 'success').then(() => {
+                            location.reload();
+                        });
                     } else {
                         Swal.fire('Error', result.message || 'Error occurred', 'error');
                     }
